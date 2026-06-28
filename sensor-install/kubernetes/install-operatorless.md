@@ -5,72 +5,72 @@ icon: cube
 
 # Install Sensor: K8s Operatorless
 
-The Operatorless method deploys the Oligo sensor directly via Helm without a managing controller. Use this method when CRDs are restricted or you prefer direct Helm management.
+Install Oligo Sensor using an installation package without installing the Sensor operator. In other words, you are responsible for upgrading and managing the sensor.
+
+## Operatorless installation overview
+
+Oligo provides an installation package that includes all the files you need to install Oligo on your target clusters. If you haven't received your installation package, contact your Oligo account manager.
+
+This guide explains how to install the Sensor in Kubernetes without the Oligo Operator. Use this method when you prefer a non-Operator installation. In this case, you are responsible for upgrading and managing the Sensor.
 
 {% hint style="info" %}
-Ensure you have completed all [pre-requisites](pre-requisites.md) before proceeding.
+Complete the [system requirements](requirements.md) and [pre-installation configurations](pre-requisites.md) before you continue.
 {% endhint %}
 
-## Install the Sensor
+## Install Sensor operatorless
 
 {% stepper %}
 {% step %}
-## Install the Oligo sensor via Helm
+### Create a namespace
 
-```bash
-helm install oligo-sensor oligo/oligo-sensor \
-  --namespace oligo \
-  --set apiTokenSecret=oligo-api-token \
-  --set mode=operatorless
+Create a namespace for the Oligo deployment.
+
+```shell
+kubectl create namespace oligo
 ```
 {% endstep %}
 
 {% step %}
-## Verify the sensor DaemonSet is running
+### Add the Oligo Helm repository
 
-```bash
+Run the following commands to add the Oligo Helm chart repository:
+
+```shell
+helm repo add oligo-helm-repo https://oligocybersecurity.github.io/helm-chart-repo
+helm repo update
+helm search repo oligo-helm-repo
+```
+{% endstep %}
+
+{% step %}
+### Install Oligo
+
+Install Oligo using the Helm chart and the provided `sensor-values.yaml` file. Replace `<desired-version>` with the version supplied in your package:
+
+```shell
+helm install oligo oligo-helm-repo/oligo --version <desired-version> -f sensor-values.yaml -n oligo
+```
+{% endstep %}
+
+{% step %}
+### Validate that Oligo is running
+
+After about 30 seconds, you should see the Sensor DaemonSet along with the scanner and collector deployments. Run:
+
+```shell
 kubectl get ds -n oligo
-kubectl get pods -n oligo
+kubectl get deploy -n oligo
 ```
 
-All sensor pods should be in a `Running` state across your cluster nodes.
+Example output:
+
+```shell
+NAME                          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+oligo-sensor                  1         1         1       1            1           <none>          112s
+
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+oligo-collector               1/1     1            1           3m18s
+oligo-scanner-watchdog        1/1     1            1           3m18s
+```
 {% endstep %}
 {% endstepper %}
-
-## Configuration Options
-
-Key Helm values you can customize:
-
-| Parameter                | Default   | Description                        |
-| ------------------------ | --------- | ---------------------------------- |
-| `apiTokenSecret`         | —         | Name of the Kubernetes secret      |
-| `mode`                   | `operatorless` | Deployment mode                |
-| `sensor.resources.cpu`   | `100m`    | CPU request for sensor pods        |
-| `sensor.resources.memory`| `128Mi`   | Memory request for sensor pods     |
-| `sensor.nodeSelector`    | `{}`      | Node selector for sensor placement |
-
-<details>
-<summary>Full list of Helm values</summary>
-
-TBD — complete Helm values reference.
-
-</details>
-
-## Upgrading
-
-To upgrade the sensor to a new version:
-
-```bash
-helm repo update
-helm upgrade oligo-sensor oligo/oligo-sensor \
-  --namespace oligo \
-  --reuse-values
-```
-
-## Verify Installation
-
-After installation, confirm the sensor is reporting to the Oligo Dashboard:
-
-1. Navigate to [Oligo Dashboard](https://app.oligo.security)
-2. Go to **Sensors** in the left sidebar
-3. Verify your cluster and nodes appear with a **Connected** status
