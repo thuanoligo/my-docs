@@ -5,49 +5,100 @@ icon: list-check
 
 # Requirements
 
-Before installing the Oligo sensor on Kubernetes, verify that your environment meets the following requirements.
+Before you install Sensor Oligo in your Kubernetes environment, confirm that your system meets the requirements set out in this article.
 
-## Supported Kubernetes Versions
+### Requirements overview
 
-| Version | Support Status |
-| ------- | -------------- |
-| 1.25+   | Supported      |
+* The Kubernetes user must have permission to create resources in the target cluster or clusters.
+* Verify that your Kubernetes platform and architecture are supported.
+* Helm must be installed locally to deploy the Sensor.
+
+### Programming languages supported
 
 {% hint style="info" %}
-Oligo supports major managed Kubernetes platforms including EKS, GKE, and AKS.
+Contact your Oligo representative for the latest list of supported programming languages.
 {% endhint %}
 
-## Node Requirements
+### Network access
 
-| Resource  | Minimum        |
-| --------- | -------------- |
-| CPU       | TBD            |
-| Memory    | TBD            |
-| Disk      | TBD            |
-| OS        | Linux (x86_64, arm64) |
+The Kubernetes cluster must allow outbound HTTPS connectivity to the following domains and ports.
 
-## Network Requirements
+| Domain                         | Port | Purpose                            |
+| ------------------------------ | ---- | ---------------------------------- |
+| `gateway.oligo.security`       | 443  | Send information to the Oligo platform |
+| `registry-1.docker.io`         | 443  | Pull Docker images                 |
+| `index.docker.io`              | 443  | Pull Docker images                 |
+| `oligocybersecurity.github.io` | 443  | Pull Helm chart                    |
+| `gcr.io`                       | 443  | Pull Docker images                 |
 
-The Oligo sensor requires outbound connectivity to the Oligo backend. Ensure the following endpoints are accessible from your cluster:
+### Machine requirements
 
-| Endpoint              | Port | Protocol | Purpose            |
-| --------------------- | ---- | -------- | ------------------ |
-| `*.oligo.security`    | 443  | HTTPS    | Sensor telemetry   |
+#### Memory
 
-{% hint style="warning" %}
-If your cluster uses a network proxy or firewall, ensure the endpoints above are allowlisted.
+| Component | Request | Limit  | Deployment                |
+| --------- | ------- | ------ | ------------------------- |
+| Sensor    | 1 Gi    | 1 Gi   | Per node (DaemonSet)      |
+| Scanner   | 256 Mi  | 512 Mi | Per cluster (Deployment)  |
+| Collector | 512 Mi  | 512 Mi | Per cluster (Deployment)  |
+
+#### Ephemeral storage
+
+| Component | Request | Limit  | Deployment                |
+| --------- | ------- | ------ | ------------------------- |
+| Sensor    | 300 Mi  | 5 Gi   | Per node (DaemonSet)      |
+| Scanner   | -       | 100 Mi | Per cluster (Deployment)  |
+| Collector | -       | 100 Mi | Per cluster (Deployment)  |
+
+#### CPU
+
+| Component | Request | Limit  | Deployment                |
+| --------- | ------- | ------ | ------------------------- |
+| Sensor    | 300m    | 2000m  | Per node (DaemonSet)      |
+| Scanner   | 100m    | 500m   | Per cluster (Deployment)  |
+| Collector | 500m    | 500m   | Per cluster (Deployment)  |
+
+## Kubernetes and platforms
+
+#### Kubernetes and Helm versions
+
+| Component  | Version         |
+| ---------- | --------------- |
+| Kubernetes | 1.19 or later   |
+| Helm       | 3.10 or later   |
+
+#### Platforms
+
+The supported platforms are listed in the table.
+
+| Platform   | Support                                     |
+| ---------- | ------------------------------------------- |
+| Amazon EKS | 1.20 and later                              |
+| Azure AKS  | 1.20 and later                              |
+| Google GKE | 1.20 and later                              |
+| K3D        | Supported — ask CSM for installation package |
+| Minikube   | Supported — ask CSM for installation package |
+| Kind       | Supported — ask CSM for installation package |
+
+{% hint style="info" %}
+When installing on K3D, enable the following flags:
+
+```bash
+k3d cluster create --host-pid-mode -v /etc/machine-id:/etc/machine-id --k3s-arg "--disable=traefik@server:0"
+```
 {% endhint %}
 
-## Permissions
+### Deployment
 
-The sensor requires the following Kubernetes RBAC permissions:
+Oligo supports the following deployment methods.
 
-* Read access to pod and namespace metadata
-* Ability to run as a DaemonSet (Operator mode) or sidecar (Operatorless mode)
+* ArgoCD
+* Helm
+* Terraform
 
-<details>
-<summary>Detailed RBAC requirements</summary>
+### Security context
 
-TBD — detailed ClusterRole and ClusterRoleBinding specifications will be listed here.
+Oligo Sensor interacts with the Linux kernel to load the eBPF program and collect data. To load an eBPF program, Oligo Sensor requires privileged access and the `SYS_ADMIN` capability.
 
-</details>
+### Kubernetes role-based access control (RBAC)
+
+Oligo Scanner interacts with the Kubernetes API to discover cluster state at runtime. For this purpose, it requires **read-only** (get, watch, and list) permissions for the following resources: Pods, Namespaces, Nodes, Services, Deployments, StatefulSets, DaemonSets, ReplicaSets, Ingresses, Gateways, and HTTPRoutes.

@@ -1,0 +1,249 @@
+<p>
+    Before you install Sensor Oligo in your Kubernetes environment, confirm that
+    your system meets the requirements set out in this article.
+  </p>
+  <h3 id="h_01KB8RVJE8Q45D61KWQPYD9HBW">Requirements overview</h3>
+  <ul>
+    <li data-list-item-id="eef8c37a7446a15610eaf8826a20cc5c5">
+      The Kubernetes user must have permission to create resources in the target
+      cluster or clusters.
+    </li>
+    <li data-list-item-id="e4e1e756f6563e1c98ed39aa7ccddb29c">
+      Verify that your Kubernetes platform and architecture are supported.
+    </li>
+    <li data-list-item-id="edaf1fe53a6b7b9268917b84c00d027c1">Helm must be installed locally to deploy the Sensor.</li>
+  </ul>
+  <h3 id="h_01KB8RN9DQS5Y93QET439JF8AB">Programming languages supported</h3>
+  <zd-content-block block-id="01KB8Q0HQT286B1QVJDF3GBBFB"></zd-content-block>
+  <h3 id="h_01KB8RQ1H431JG5BNZG4WWNST9">Network access</h3>
+  <p>
+    The Kubernetes cluster must allow outbound HTTPS connectivity to the following
+    domains and ports.
+  </p>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table>
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Port</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>gateway.oligo.security</td>
+          <td>443</td>
+          <td>Send information to the Oligo platform</td>
+        </tr>
+        <tr>
+          <td>registry-1.docker.io</td>
+          <td>443</td>
+          <td>Pull Docker images</td>
+        </tr>
+        <tr>
+          <td>index.docker.io</td>
+          <td>443</td>
+          <td>Pull Docker images</td>
+        </tr>
+        <tr>
+          <td>oligocybersecurity.github.io</td>
+          <td>443</td>
+          <td>Pull Helm chart</td>
+        </tr>
+        <tr>
+          <td>gcr.io</td>
+          <td>443</td>
+          <td>Pull Docker images</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <h3 id="h_01KB8PP2SV0E701M3SK4CNDAF5">Machine requirements</h3>
+  <h4 id="h_01K3PPRR6V86X2RFC8JST9WESZ">Memory&nbsp;</h4>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Request</th>
+          <th>Limit</th>
+          <th>Deployment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sensor</td>
+          <td>1 Gi</td>
+          <td>1 Gi</td>
+          <td>Per node (DaemonSet)</td>
+        </tr>
+        <tr>
+          <td>Scanner</td>
+          <td>256 Mi</td>
+          <td>512 Mi</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+        <tr>
+          <td>Collector</td>
+          <td>512 Mi</td>
+          <td>512 Mi</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <h4 id="ephemeral-storage">Ephemeral storage</h4>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Request</th>
+          <th>Limit</th>
+          <th>Deployment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sensor</td>
+          <td>300 Mi</td>
+          <td>5 Gi</td>
+          <td>Per node (DaemonSet)</td>
+        </tr>
+        <tr>
+          <td>Scanner</td>
+          <td>-</td>
+          <td>100 Mi</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+        <tr>
+          <td>Collector</td>
+          <td>-</td>
+          <td>100 Mi</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <h4 id="h_01K3PPRR6YT18KWBFC1K6FAMZ2">CPU&nbsp;</h4>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Request</th>
+          <th>Limit</th>
+          <th>Deployment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sensor</td>
+          <td>300m</td>
+          <td>2000m</td>
+          <td>Per node (DaemonSet)</td>
+        </tr>
+        <tr>
+          <td>Scanner</td>
+          <td>100m</td>
+          <td>500m</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+        <tr>
+          <td>Collector</td>
+          <td>500m</td>
+          <td>500m</td>
+          <td>Per cluster (Deployment)</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <h2 id="h_01KB8PPEWS4XHK30RXR4A4NQ14">Kubernetes and platforms</h2>
+  <h4 id="minimum-versions">Kubernetes and Helm versions</h4>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table style="margin-left: 0px; margin-right: auto;">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Version</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Kubernetes</td>
+          <td>1.19 or later</td>
+        </tr>
+        <tr>
+          <td>Helm</td>
+          <td>3.10 or later</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <h4 id="kubernetes-platforms">Platforms</h4>
+  <p>The supported platforms are listed in the table.&nbsp;</p>
+  <figure class="wysiwyg-table wysiwyg-table-align-left">
+    <table>
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Support</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Amazon EKS</td>
+          <td>1.20 and later</td>
+        </tr>
+        <tr>
+          <td>Azure AKS</td>
+          <td>1.20 and later</td>
+        </tr>
+        <tr>
+          <td>Google GKE</td>
+          <td>1.20 and later</td>
+        </tr>
+        <tr>
+          <td>K3D</td>
+          <td>Supported - ask CSM for installation package</td>
+        </tr>
+        <tr>
+          <td>Minikube</td>
+          <td>Supported - ask CSM for installation package</td>
+        </tr>
+        <tr>
+          <td>Kind</td>
+          <td>Supported - ask CSM for installation package</td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>
+    <strong>Note:</strong> When installing on K3D, enable the following flags:
+  </p>
+  <pre><code class="language-bash">k3d cluster create --host-pid-mode -v /etc/machine-id:/etc/machine-id --k3s-arg "--disable=traefik@server:0"
+  </code></pre>
+  <h3 id="deployment">Deployment</h3>
+  <p>Oligo supports the following deployment methods.</p>
+  <ul>
+    <li data-list-item-id="ec076d5c0cc5dc655b67d97f876f5442f">
+      <a href="/hc/en-us/articles/35775075210003">ArgoCD</a>
+    </li>
+    <li data-list-item-id="e747f0ebfbcd44ab088b87e8d38d4bb30">Helm</li>
+    <li data-list-item-id="efe53cf3b037b5f8c07c8cd3e1652a46f">Terraform</li>
+  </ul>
+  <h3 id="h_01K3PPRR719HCHYKB5YT1BCEJY">Security context</h3>
+  <p>
+    Oligo Sensor interacts with the Linux kernel to load the eBPF program and collect
+    data. To load an eBPF program, Oligo Sensor requires privileged access and the
+    <code>SYS_ADMIN</code> capability.
+  </p>
+  <h3 id="rbac">Kubernetes role-based access control (RBAC)</h3>
+  <p>
+    Oligo Scanner interacts with the Kubernetes API to discover cluster state at
+    runtime. For this purpose, it requires <strong>read-only</strong> (get, watch,
+    and list) permissions for the following resources: Pods, Namespaces, Nodes, Services,
+    Deployments, StatefulSets, DaemonSets, ReplicaSets, Ingresses, Gateways, and
+    HTTPRoutes.
+  </p>
+  <h2 id="supported-programming-languages">&nbsp;</h2>
